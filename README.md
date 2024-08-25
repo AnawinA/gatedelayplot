@@ -48,3 +48,5 @@ in KMITL university
     G |---__-------|
 
 ### Matplotlib
+
+![plot Matplotlib](https://github.com/user-attachments/assets/2cfe0970-d0d2-485f-8b4b-5f7aa347c54a)
