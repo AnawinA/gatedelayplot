@@ -18,6 +18,7 @@ in KMITL university
 - plot() - plot all column & name (using step line)
 - plot(*keys) - plot by key you select
 - print_str() - print plot by string
+- print_str(*keys) - print plot by string on key you select
 
 ### add
 
@@ -33,7 +34,11 @@ in KMITL university
 
 - get_dict() - get dict that store name & 0/1 list
 - get_init_dict() - get dict that from create object
-- 
+- get_str() - similar print_str() but return instead
+
+## Example
+
+### print_str()
 
     A |_----_______|
     B |___---______|
@@ -41,3 +46,5 @@ in KMITL university
     D |-_-----_____|
     F |---___------|
     G |---__-------|
+
+### Matplotlib
