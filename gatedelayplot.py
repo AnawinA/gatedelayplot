@@ -1,6 +1,6 @@
 class GateDelayPlot:
 
-    def __init__(self, init_gate: dict[int], name: str="unknown") -> None:
+    def __init__(self, init_gate: dict[int], name: str="gate delay") -> None:
         self._init_gate = init_gate
         self.gates = init_gate
         self.name = name
@@ -15,13 +15,19 @@ class GateDelayPlot:
     def get_init_dict(self) -> dict:
         return self._init_gate
     
-    def print_str(self, *gate: str):
+    def print_str(self, *gate: str, hide_x=False):
+        def signal(x: str):
+            if not x:
+                return "_"
+            elif x == 1:
+                return "-"
+            return " " if hide_x else "x"
         if gate:
             for i in gate:
-                print(f"{i[0]:<{self.str_space}} |{"".join(map(lambda x: '-' if x else '_', self.gates[i]))}|")
+                print(f"{i[0]:<{self.str_space}} |{"".join(map(signal, self.gates[i]))}|")
         else:
             for i in self.gates.items():
-                print(f"{i[0]:<{self.str_space}} |{"".join(map(lambda x: '-' if x else '_', i[1]))}|")
+                print(f"{i[0]:<{self.str_space}} |{"".join(map(signal, i[1]))}|")
     
     def get_str(self, gate: str):
         return gate + " |" + "".join(map(lambda x: '-' if x else '_', self.gates[gate])) + "|"
@@ -34,6 +40,7 @@ class GateDelayPlot:
         import matplotlib.pyplot as plt
         import numpy as np
         fig, axs = plt.subplots(len(gate_dict), figsize=figsize, squeeze=False)
+        fig.canvas.manager.set_window_title(self.name)
         fig.tight_layout()
         for i, (name, gate) in enumerate(gate_dict.items()):
             gate.insert(0, gate[0])
@@ -58,7 +65,7 @@ class GateDelayPlot:
     def add(self, gate_dict: dict[int]):
         self.gates.update(gate_dict)
     
-    def add_delay(self, gate_dict: dict[int], delay=()):
+    def _add_delay_config(self, gate_dict: dict[int], delay=()):
         if not delay:
             delay = tuple([1] * len(gate_dict))
         for i, gate in enumerate(gate_dict.items()):
@@ -88,15 +95,14 @@ class GateDelayPlot:
     
     def _find_name(self, name: str):
         no_parent = name.split(":")[1]
-        # if name in self.gates.keys():
-        #     return "".endswith(name)
-        # else:
-        #     return None
+        return no_parent
     
     def _logic_calc(self, key: tuple[str], type: str,):
         def not_null(a, b=0):
             return (a == -1 or b == -1)
         match type:
+            case "none":
+                return f"{key[0]}", [int(i) if not i == -1 else -1 for i in self.gates[key[0]]]
             case "and":
                 return f"{key[0]}&{key[1]}", [int(a and b) 
                         if not not_null(a, b) else -1 
@@ -127,8 +133,11 @@ class GateDelayPlot:
         parent_name, gate_config = self._logic_calc(keys, type=type)
         if parent:
             key_name = parent_name + ":" + key_name
-        self.add_delay({key_name: gate_config}, delay=(delay,))
+        self._add_delay_config({key_name: gate_config}, delay=(delay,))
         self._update_str_space()
+    
+    def add_delay(self, key: str, name="", delay=1, parent=False):
+        self._add_config(key, type="none", name=name, delay=delay, parent=parent)
     
     def add_not(self, key: str, name="", delay=1, parent=False):
         self._add_config(key, type="not", name=name, delay=delay, parent=parent)
@@ -148,20 +157,3 @@ class GateDelayPlot:
     def add_xor(self, key1: str, key2: str, name="", delay=1, parent=False):
         self._add_config(key1, key2, type="xor", name=name, delay=delay, parent=parent)
 
-
-
-# delay = GateDelayPlot({
-#     "A": [0, 1, 1, 0, 1],
-#     "B": [1, 0, 1, 1, 1]
-# })
-# # delay.print_str('A')
-# # print(delay.get_str("A"))
-# # print(delay["A"])
-# # delay.add({"C": [1, 1, 0, 0, 1]})
-# # delay.add_delay({"D": [1, 1, 0, 0, 1]}, delay=(3,))
-# # print(delay.gates, delay._init_gate)
-# delay.add_not("A", delay=1, parent=True)
-# delay.add_not("B", delay=1, name="dk")
-# delay.print_str()
-# delay.plot()
-# delay.plot()
